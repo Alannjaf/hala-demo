@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hala – demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#E8603C; --brand-dark:#B9431F; --ink:#1F1A17; --muted:#7A706A;
+    --bg:#F6F1EA; --card:#FFFFFF; --line:#E8E0D6; --ok:#2E8B57; --wa:#25D366;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Noto Sans Arabic","Inter",system-ui,sans-serif;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center}
+  html[lang=en] body{font-family:"Inter","Noto Sans Arabic",system-ui,sans-serif}
+  .topbar{width:100%;max-width:980px;display:flex;justify-content:space-between;align-items:center;
+    gap:12px;padding:16px;flex-wrap:wrap}
+  .logo{font-weight:800;font-size:26px;color:var(--brand)}
+  .logo small{font-size:12px;color:var(--muted);font-weight:600;margin-inline-start:8px}
+  .seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px}
+  .seg button{border:0;background:none;padding:8px 14px;border-radius:999px;font:inherit;font-size:14px;
+    font-weight:600;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--ink);color:#fff}
+  .phone{width:380px;max-width:calc(100vw - 24px);height:760px;max-height:calc(100vh - 140px);min-height:600px;
+    background:var(--card);border-radius:36px;
+    border:10px solid var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.18);overflow:hidden;position:relative;
+    display:flex;flex-direction:column;margin-bottom:24px}
+  .phone.wide{width:760px}
+  .screen{flex:1;overflow:auto;padding:20px;display:none}
+  .screen.on{display:block}
+  h1{font-size:22px;margin:4px 0 4px} h2{font-size:17px;margin:18px 0 8px}
+  p{margin:4px 0;line-height:1.6}
+  .muted{color:var(--muted);font-size:14px}
+  .shop{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .shop .badge{width:52px;height:52px;border-radius:16px;background:var(--brand);color:#fff;display:grid;
+    place-items:center;font-size:26px}
+  label{display:block;font-size:14px;font-weight:600;margin:14px 0 6px}
+  input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;font:inherit;font-size:16px;background:#fff}
+  input:focus{outline:none;border-color:var(--brand)}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:0;border-radius:14px;
+    font:inherit;font-weight:800;font-size:16px;cursor:pointer;margin-top:12px;background:var(--brand);color:#fff}
+  .btn:active{transform:scale(.98)}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .btn.wa{background:var(--wa);color:#073b1d}
+  .btn.ok{background:var(--ok)}
+  .btn[disabled]{opacity:.4;cursor:not-allowed}
+  .row{display:flex;gap:10px}.row .btn{flex:1}
+  /* loyalty card */
+  .lcard{background:linear-gradient(140deg,var(--brand),var(--brand-dark));color:#fff;border-radius:22px;padding:18px;
+    box-shadow:0 10px 30px rgba(185,67,31,.35);position:relative;overflow:hidden}
+  .lcard:after{content:"";position:absolute;inset:auto -60px -80px auto;width:200px;height:200px;border-radius:50%;
+    background:rgba(255,255,255,.08)}
+  .lcard .top{display:flex;justify-content:space-between;align-items:center}
+  .lcard .name{font-weight:800;font-size:18px}
+  .lcard .count{font-weight:800;font-size:15px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:999px}
+  .stamps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0 12px}
+  .stamp{aspect-ratio:1;border-radius:50%;border:2px dashed rgba(255,255,255,.55);display:grid;place-items:center;font-size:22px}
+  .stamp.full{background:#fff;border:0;animation:pop .35s ease}
+  @keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+  .lcard .reward{font-size:14px;opacity:.95}
+  .qrbox{background:#fff;border-radius:18px;border:1px solid var(--line);padding:16px;margin-top:14px;text-align:center}
+  .qrbox svg{width:150px;height:150px}
+  .code{font-family:"Inter",monospace;letter-spacing:2px;font-weight:600;margin-top:6px}
+  .ready{background:#FFF4D6;border:1.5px solid #F2C14E;color:#6B4E00;border-radius:14px;padding:12px;margin-top:12px;
+    font-weight:700;text-align:center;display:none}
+  .ready.on{display:block;animation:pop .35s ease}
+  .note{background:#F1ECE5;border-radius:12px;padding:10px 12px;font-size:13px;color:var(--muted);margin-top:12px}
+  /* staff */
+  .scanner{height:200px;border-radius:18px;background:#1c1c1c;position:relative;display:grid;place-items:center;color:#bbb;
+    font-size:14px;overflow:hidden}
+  .scanner .frame{width:130px;height:130px;border:3px solid #fff;border-radius:16px;position:absolute;opacity:.85}
+  .scanner .laser{position:absolute;width:130px;height:2px;background:var(--brand);animation:scan 1.8s ease-in-out infinite}
+  @keyframes scan{0%,100%{transform:translateY(-60px)}50%{transform:translateY(60px)}}
+  .cust{border:1.5px solid var(--line);border-radius:16px;padding:14px;margin-top:14px}
+  .cust .head{display:flex;justify-content:space-between;align-items:center}
+  .bar{height:10px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0 2px}
+  .bar i{display:block;height:100%;background:var(--brand);transition:width .3s}
+  .toast{position:absolute;inset-inline:20px;bottom:20px;background:var(--ink);color:#fff;padding:12px 14px;border-radius:12px;
+    font-size:14px;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;z-index:5}
+  .toast.on{opacity:1;transform:none}
+  /* dashboard */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .stat{background:#FBF8F4;border:1px solid var(--line);border-radius:14px;padding:12px}
+  .stat b{display:block;font-size:24px}
+  .stat span{font-size:13px;color:var(--muted)}
+  .chart{background:#FBF8F4;border:1px solid var(--line);border-radius:14px;padding:12px}
+  .chart svg{width:100%;height:150px;display:block}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  td{padding:10px 6px;border-bottom:1px solid var(--line)}
+  td .mini{padding:7px 10px;border-radius:10px;border:0;background:var(--wa);color:#073b1d;font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+  .grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-top:12px}
+  .demo{font-size:12px;color:var(--muted);text-align:center;margin:-12px 0 24px;max-width:600px;padding:0 12px}
+  @media (max-width:800px){.phone.wide{width:380px}.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+  @media (max-width:500px){.phone{border:0;border-radius:0;box-shadow:none;max-width:100vw;width:100vw;height:auto;max-height:none;margin:0}.phone.wide{width:100vw}.topbar{padding:10px}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">Hala · هلا <small data-t="tag"></small></div>
+  <div class="seg" id="views" role="tablist">
+    <button data-v="join" class="on" data-t="v_join"></button>
+    <button data-v="card" data-t="v_card"></button>
+    <button data-v="staff" data-t="v_staff"></button>
+    <button data-v="owner" data-t="v_owner"></button>
+  </div>
+  <div class="seg" id="langs">
+    <button data-l="ckb" class="on">کوردی</button>
+    <button data-l="ar">عربي</button>
+    <button data-l="en">EN</button>
+  </div>
+</div>
+
+<div class="phone" id="phone">
+  <!-- 1. Join -->
+  <section class="screen on" id="s-join">
+    <div class="shop"><div class="badge">☕</div><div><h1 data-t="shop"></h1><p class="muted" data-t="city"></p></div></div>
+    <h2 data-t="join_title"></h2>
+    <p class="muted" data-t="join_sub"></p>
+    <label for="nm" data-t="name"></label><input id="nm" autocomplete="off" data-ph="name_ph">
+    <label for="ph" data-t="phone"></label><input id="ph" inputmode="tel" dir="ltr" placeholder="0750 123 4567">
+    <button class="btn" id="getCard" data-t="get_card"></button>
+    <p class="note" data-t="no_app"></p>
+  </section>
+
+  <!-- 2. Customer card -->
+  <section class="screen" id="s-card">
+    <div class="lcard">
+      <div class="top"><div class="name" data-t="shop"></div><div class="count" id="cnt"></div></div>
+      <div class="stamps" id="stamps"></div>
+      <div class="reward" data-t="reward_rule"></div>
+    </div>
+    <div class="ready" id="ready" data-t="ready"></div>
+    <div class="qrbox">
+      <div id="qr"></div>
+      <div class="muted" data-t="show_code"></div>
+      <div class="code" id="who"></div>
+    </div>
+    <button class="btn wa" id="toWa" data-t="send_wa"></button>
+    <button class="btn ghost" id="toHome" data-t="add_home"></button>
+  </section>
+
+  <!-- 3. Staff -->
+  <section class="screen" id="s-staff">
+    <h1 data-t="staff_title"></h1>
+    <div class="scanner"><div class="frame"></div><div class="laser"></div><span data-t="scan_hint"></span></div>
+    <label for="find" data-t="or_phone"></label>
+    <input id="find" inputmode="tel" dir="ltr" placeholder="0750 …">
+    <div class="cust">
+      <div class="head"><b id="cname"></b><span class="muted" dir="ltr" id="cphone"></span></div>
+      <div class="bar"><i id="cbar"></i></div>
+      <div class="muted" id="cstat"></div>
+      <div class="row">
+        <button class="btn" id="add" data-t="add_stamp"></button>
+        <button class="btn ghost" id="undo" data-t="undo"></button>
+      </div>
+      <button class="btn ok" id="redeem" data-t="redeem"></button>
+    </div>
+  </section>
+
+  <!-- 4. Owner dashboard -->
+  <section class="screen" id="s-owner">
+    <h1 data-t="dash_title"></h1>
+    <p class="muted" data-t="dash_sub"></p>
+    <div class="stats" style="margin-top:12px">
+      <div class="stat"><b data-n="248"></b><span data-t="st_cust"></span></div>
+      <div class="stat"><b data-n="612"></b><span data-t="st_visits"></span></div>
+      <div class="stat"><b data-n="37"></b><span data-t="st_rewards"></span></div>
+      <div class="stat"><b data-n="19"></b><span data-t="st_lost"></span></div>
+    </div>
+    <div class="grid2">
+      <div class="chart"><b style="font-size:14px" data-t="chart_title"></b><svg id="chart" viewBox="0 0 300 150" role="img"></svg></div>
+      <div class="chart">
+        <b style="font-size:14px" data-t="offer_title"></b>
+        <input id="offer" style="margin-top:8px" data-ph="offer_ph">
+        <button class="btn" id="sendOffer" data-t="offer_btn"></button>
+      </div>
+    </div>
+    <h2 data-t="lost_title"></h2>
+    <table id="lost"></table>
+  </section>
+
+  <div class="toast" id="toast"></div>
+</div>
+<p class="demo" data-t="demo"></p>
+
+<script>
+const T = {
+  ckb:{dir:"rtl",tag:"کارتی دڵسۆزی دیجیتاڵ",v_join:"بەشداربوون",v_card:"کارتی کڕیار",v_staff:"کارمەند",v_owner:"خاوەنی دوکان",
+    shop:"کافێی شار",city:"هەولێر · شەقامی ١٠٠ مەتری",join_title:"ببە ئەندامی کارتی دڵسۆزیمان",
+    join_sub:"هەر جارێک سەردانمان بکەیت مۆرێک وەردەگریت. ١٠ مۆر = قاوەیەکی بەخۆڕایی.",
+    name:"ناو",name_ph:"ناوت بنووسە",phone:"ژمارەی مۆبایل",get_card:"کارتەکەم وەربگرە",
+    no_app:"پێویست بە دابەزاندنی هیچ ئەپێک ناکات. کارتەکەت وەک لاپەڕەیەک لەسەر مۆبایلەکەت دەمێنێتەوە.",
+    reward_rule:"١٠ مۆر کۆبکەرەوە، قاوەیەکی بەخۆڕایی وەربگرە",ready:"🎉 دیارییەکەت ئامادەیە! ئەم کارتە لە کاونتەر نیشان بدە.",
+    show_code:"ئەم کۆدە لە کاونتەر نیشان بدە",send_wa:"کارتەکەم بنێرە بۆ واتسئاپ",add_home:"زیادی بکە بۆ سەر شاشەی سەرەکی",
+    staff_title:"مۆر زیادکردن",scan_hint:"کامێرا بخەرە سەر کۆدی کڕیار",or_phone:"یان بە ژمارەی مۆبایل بگەڕێ",
+    add_stamp:"+ مۆرێک",undo:"گەڕانەوە",redeem:"دیاری بدە ✓",stamps_of:"{n} لە ١٠ مۆر",
+    dash_title:"کورتەی ئەم مانگە",dash_sub:"هەموو ژمارەکان نموونەن.",st_cust:"کڕیار",st_visits:"سەردان",st_rewards:"دیاری دراو",
+    st_lost:"نەگەڕاونەتەوە",chart_title:"سەردانەکان بە هەفتە",offer_title:"ئۆفەر بنێرە بۆ هەمووان",
+    offer_ph:"بۆ نموونە: هەینی کێکی دووەم بەخۆڕایی",offer_btn:"ناردن",lost_title:"٣٠ ڕۆژە سەردانیان نەکردووە",
+    wa_btn:"واتسئاپ",days:"{n} ڕۆژ",t_stamp:"مۆرێک زیادکرا ✓",t_redeem:"دیاری درا. کارتەکە سفر کرایەوە.",
+    t_wa:"(نموونە) واتسئاپ دەکرێتەوە بە نامەیەکی ئامادە.",t_home:"(نموونە) ئایکۆنی کارتەکە دەچێتە سەر شاشەی سەرەکی.",
+    t_offer:"(نموونە) ئۆفەرەکە نێردرا بۆ ٢٤٨ کڕیار.",t_need:"تکایە ناو و ژمارە بنووسە.",t_undo:"مۆرەکە لابرا.",
+    demo:"ئەمە نموونەیەکی کلیککراوە بۆ پیشاندان. هیچ داتایەک ناپارێزرێت و هیچ نامەیەک نانێردرێت."},
+  ar:{dir:"rtl",tag:"بطاقة ولاء رقمية",v_join:"الانضمام",v_card:"بطاقة الزبون",v_staff:"الموظف",v_owner:"صاحب المحل",
+    shop:"كافيه شار",city:"أربيل · شارع ١٠٠ متر",join_title:"انضم إلى بطاقة الولاء",
+    join_sub:"احصل على ختم في كل زيارة. ١٠ أختام = قهوة مجانية.",
+    name:"الاسم",name_ph:"اكتب اسمك",phone:"رقم الهاتف",get_card:"احصل على بطاقتي",
+    no_app:"لا حاجة لتحميل أي تطبيق. تبقى بطاقتك كصفحة على هاتفك.",
+    reward_rule:"اجمع ١٠ أختام واحصل على قهوة مجانية",ready:"🎉 مكافأتك جاهزة! أظهر هذه البطاقة عند الكاشير.",
+    show_code:"أظهر هذا الرمز عند الكاشير",send_wa:"أرسل بطاقتي إلى واتساب",add_home:"أضف إلى الشاشة الرئيسية",
+    staff_title:"إضافة ختم",scan_hint:"وجّه الكاميرا إلى رمز الزبون",or_phone:"أو ابحث برقم الهاتف",
+    add_stamp:"+ ختم",undo:"تراجع",redeem:"سلّم المكافأة ✓",stamps_of:"{n} من ١٠ أختام",
+    dash_title:"ملخص هذا الشهر",dash_sub:"جميع الأرقام للعرض فقط.",st_cust:"زبون",st_visits:"زيارة",st_rewards:"مكافأة ممنوحة",
+    st_lost:"لم يعودوا",chart_title:"الزيارات أسبوعياً",offer_title:"أرسل عرضاً للجميع",
+    offer_ph:"مثلاً: الجمعة الكيكة الثانية مجاناً",offer_btn:"إرسال",lost_title:"لم يزوروا منذ ٣٠ يوماً",
+    wa_btn:"واتساب",days:"{n} يوم",t_stamp:"تمت إضافة ختم ✓",t_redeem:"تم تسليم المكافأة. أعيدت البطاقة إلى الصفر.",
+    t_wa:"(عرض) يفتح واتساب برسالة جاهزة.",t_home:"(عرض) تظهر أيقونة البطاقة على الشاشة الرئيسية.",
+    t_offer:"(عرض) أُرسل العرض إلى ٢٤٨ زبوناً.",t_need:"يرجى كتابة الاسم والرقم.",t_undo:"تم حذف الختم.",
+    demo:"هذا نموذج تفاعلي للعرض فقط. لا يتم حفظ أي بيانات ولا إرسال أي رسالة."},
+  en:{dir:"ltr",tag:"digital loyalty card",v_join:"Join",v_card:"Customer card",v_staff:"Staff",v_owner:"Owner",
+    shop:"Shar Café",city:"Erbil · 100m Street",join_title:"Join our loyalty card",
+    join_sub:"Get a stamp on every visit. 10 stamps = a free coffee.",
+    name:"Name",name_ph:"Your name",phone:"Phone number",get_card:"Get my card",
+    no_app:"No app to download. Your card lives as a page on your phone.",
+    reward_rule:"Collect 10 stamps, get a free coffee",ready:"🎉 Your reward is ready! Show this card at the counter.",
+    show_code:"Show this code at the counter",send_wa:"Send my card to WhatsApp",add_home:"Add to home screen",
+    staff_title:"Add a stamp",scan_hint:"Point the camera at the customer's code",or_phone:"Or search by phone number",
+    add_stamp:"+ Stamp",undo:"Undo",redeem:"Give reward ✓",stamps_of:"{n} of 10 stamps",
+    dash_title:"This month",dash_sub:"All numbers are sample data.",st_cust:"Customers",st_visits:"Visits",st_rewards:"Rewards given",
+    st_lost:"Didn't come back",chart_title:"Visits per week",offer_title:"Send an offer to everyone",
+    offer_ph:"e.g. Friday: second cake free",offer_btn:"Send",lost_title:"No visit in 30 days",
+    wa_btn:"WhatsApp",days:"{n} days",t_stamp:"Stamp added ✓",t_redeem:"Reward given. Card reset to zero.",
+    t_wa:"(Demo) Opens WhatsApp with a ready message.",t_home:"(Demo) The card icon is added to the home screen.",
+    t_offer:"(Demo) Offer sent to 248 customers.",t_need:"Please enter a name and phone number.",t_undo:"Stamp removed.",
+    demo:"Clickable demo for showing shop owners. No data is saved and no messages are sent."}
+};
+const LOST=[["Karwan","کاروان","كاروان",34],["Shilan","شیلان","شيلان",41],["Dilan","دیلان","ديلان",45],["Hawre","هاوڕێ","هاوري",52]];
+const WEEKS=[38,44,41,52,49,58,63,61];
+let lang="ckb", stamps=6, view="join", custName="Rozh", custPhone="0750 123 4821";
+const $=s=>document.querySelector(s);
+const ar="٠١٢٣٤٥٦٧٨٩";
+const num=n=>lang==="en"?String(n):String(n).replace(/\d/g,d=>ar[d]);
+const t=(k,n)=>(T[lang][k]||k).replace("{n}",num(n));
+
+function toast(k){const el=$("#toast");el.textContent=t(k);el.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>el.classList.remove("on"),2200)}
+
+function qr(seed){ // fake QR-like pattern for the demo
+  let s=seed,r=()=>((s=(s*9301+49297)%233280)/233280);const n=25,c=6;let out="";
+  const finder=(x,y)=>`<rect x="${x*c}" y="${y*c}" width="${7*c}" height="${7*c}" fill="#1F1A17"/><rect x="${(x+1)*c}" y="${(y+1)*c}" width="${5*c}" height="${5*c}" fill="#fff"/><rect x="${(x+2)*c}" y="${(y+2)*c}" width="${3*c}" height="${3*c}" fill="#1F1A17"/>`;
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){const inF=(x<8&&y<8)||(x>16&&y<8)||(x<8&&y>16);if(!inF&&r()>.52)out+=`<rect x="${x*c}" y="${y*c}" width="${c}" height="${c}" fill="#1F1A17"/>`}
+  return `<svg viewBox="0 0 ${n*c} ${n*c}" aria-label="QR">${out}${finder(0,0)}${finder(18,0)}${finder(0,18)}</svg>`;
+}
+function chart(){
+  const max=70,w=300,h=150,bw=26,gap=(w-WEEKS.length*bw)/(WEEKS.length+1);
+  $("#chart").innerHTML=WEEKS.map((v,i)=>{const bh=v/max*(h-24),x=gap+i*(bw+gap);
+    return `<rect x="${x}" y="${h-18-bh}" width="${bw}" height="${bh}" rx="5" fill="${i===WEEKS.length-1?'#E8603C':'#F2B8A4'}"><title>${v}</title></rect><text x="${x+bw/2}" y="${h-4}" font-size="10" text-anchor="middle" fill="#7A706A">${num(i+1)}</text>`}).join("");
+}
+function render(){
+  const L=T[lang];document.documentElement.lang=lang;document.documentElement.dir=L.dir;
+  document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
+  document.querySelectorAll("[data-ph]").forEach(el=>el.placeholder=t(el.dataset.ph));
+  document.querySelectorAll("[data-n]").forEach(el=>el.textContent=num(el.dataset.n));
+  $("#stamps").innerHTML=Array.from({length:10},(_,i)=>`<div class="stamp ${i<stamps?'full':''}">${i<stamps?'☕':''}</div>`).join("");
+  $("#cnt").textContent=`${num(stamps)}/${num(10)}`;
+  $("#ready").classList.toggle("on",stamps>=10);
+  $("#who").textContent=custName+" · "+num(4821);
+  $("#cname").textContent=custName; $("#cphone").textContent=custPhone;
+  $("#cbar").style.width=stamps*10+"%"; $("#cstat").textContent=t("stamps_of",stamps);
+  $("#add").disabled=stamps>=10; $("#undo").disabled=stamps<=0; $("#redeem").disabled=stamps<10;
+  $("#redeem").style.display=stamps>=10?"flex":"none";
+  const li=lang==="ckb"?1:lang==="ar"?2:0;
+  $("#lost").innerHTML=LOST.map(r=>`<tr><td><b>${r[li]}</b></td><td class="muted">${t("days",r[3])}</td><td style="text-align:end"><button class="mini" data-wa>${t("wa_btn")}</button></td></tr>`).join("");
+  document.querySelectorAll("[data-wa]").forEach(b=>b.onclick=()=>toast("t_wa"));
+  chart();
+}
+function go(v){view=v;document.querySelectorAll("#views button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id==="s-"+v));
+  $("#phone").classList.toggle("wide",v==="owner");}
+$("#views").onclick=e=>{if(e.target.dataset.v)go(e.target.dataset.v)};
+$("#langs").onclick=e=>{const l=e.target.dataset.l;if(!l)return;lang=l;$("#toast").classList.remove("on");
+  document.querySelectorAll("#langs button").forEach(b=>b.classList.toggle("on",b.dataset.l===l));render()};
+$("#getCard").onclick=()=>{const n=$("#nm").value.trim(),p=$("#ph").value.trim();
+  if(!n||!p){toast("t_need");return} custName=n;custPhone=p;stamps=1;render();go("card");toast("t_stamp")};
+$("#add").onclick=()=>{if(stamps<10){stamps++;render();toast("t_stamp")}};
+$("#undo").onclick=()=>{if(stamps>0){stamps--;render();toast("t_undo")}};
+$("#redeem").onclick=()=>{stamps=0;render();toast("t_redeem")};
+$("#toWa").onclick=()=>toast("t_wa"); $("#toHome").onclick=()=>toast("t_home");
+$("#sendOffer").onclick=()=>{toast("t_offer");$("#offer").value=""};
+$("#qr").innerHTML=qr(4821);
+render();
+</script>
+</body>
+</html>
