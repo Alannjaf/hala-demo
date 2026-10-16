@@ -24,6 +24,8 @@
   .seg button{border:0;background:none;padding:8px 14px;border-radius:999px;font:inherit;font-size:14px;
     font-weight:600;color:var(--muted);cursor:pointer}
   .seg button.on{background:var(--ink);color:#fff}
+  #views{max-width:100%;overflow-x:auto;scrollbar-width:none}
+  #views button{white-space:nowrap}
   .phone{width:380px;max-width:calc(100vw - 24px);height:760px;max-height:calc(100vh - 140px);min-height:600px;
     background:var(--card);border-radius:36px;
     border:10px solid var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.18);overflow:hidden;position:relative;
@@ -58,6 +60,7 @@
   .lcard .count{font-weight:800;font-size:15px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:999px}
   .stamps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0 12px}
   .stamp{aspect-ratio:1;border-radius:50%;border:2px dashed rgba(255,255,255,.55);display:grid;place-items:center;font-size:22px}
+  .stamp.gift{background:#FFE7A8;border:0}
   .stamp.full{background:#fff;border:0;animation:pop .35s ease}
   @keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
   .lcard .reward{font-size:14px;opacity:.95}
@@ -92,9 +95,15 @@
   td{padding:10px 6px;border-bottom:1px solid var(--line)}
   td .mini{padding:7px 10px;border-radius:10px;border:0;background:var(--wa);color:#073b1d;font:inherit;font-weight:700;font-size:13px;cursor:pointer}
   .grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-top:12px}
+  .tgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .tile{border:1.5px solid var(--line);background:#FBF8F4;border-radius:16px;padding:16px 10px;font:inherit;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink)}
+  .tile span{font-size:28px}.tile b{font-size:14px}
+  .tile:active{transform:scale(.97)}
+  .menu td:last-child{text-align:end;white-space:nowrap}
   .demo{font-size:12px;color:var(--muted);text-align:center;margin:-12px 0 24px;max-width:600px;padding:0 12px}
   @media (max-width:800px){.phone.wide{width:380px}.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
-  @media (max-width:500px){.phone{border:0;border-radius:0;box-shadow:none;max-width:100vw;width:100vw;height:auto;max-height:none;margin:0}.phone.wide{width:100vw}.topbar{padding:10px}}
+  @media (max-width:500px){#views button{padding:7px 9px;font-size:13px}.phone{border:0;border-radius:0;box-shadow:none;max-width:100vw;width:100vw;height:auto;max-height:none;margin:0}.phone.wide{width:100vw}.topbar{padding:10px}}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -106,6 +115,7 @@
     <button data-v="card" data-t="v_card"></button>
     <button data-v="staff" data-t="v_staff"></button>
     <button data-v="owner" data-t="v_owner"></button>
+    <button data-v="table" data-t="v_table"></button>
   </div>
   <div class="seg" id="langs">
     <button data-l="ckb" class="on">کوردی</button>
@@ -132,6 +142,7 @@
       <div class="top"><div class="name" data-t="shop"></div><div class="count" id="cnt"></div></div>
       <div class="stamps" id="stamps"></div>
       <div class="reward" data-t="reward_rule"></div>
+      <div class="reward" style="margin-top:4px;opacity:.85" data-t="gift_note"></div>
     </div>
     <div class="ready" id="ready" data-t="ready"></div>
     <div class="qrbox">
@@ -183,15 +194,31 @@
     <table id="lost"></table>
   </section>
 
+  <!-- 5. Table tag -->
+  <section class="screen" id="s-table">
+    <div class="shop"><div class="badge">📶</div><div><h1 data-t="shop"></h1><p class="muted" data-t="table_no"></p></div></div>
+    <p class="muted" data-t="table_sub"></p>
+    <div class="tgrid">
+      <button class="tile" id="tMenu"><span>📖</span><b data-t="tb_menu"></b></button>
+      <button class="tile" id="tCard"><span>☕</span><b data-t="tb_card"></b></button>
+      <button class="tile" id="tWaiter"><span>🙋</span><b data-t="tb_waiter"></b></button>
+      <button class="tile" id="tBill"><span>🧾</span><b data-t="tb_bill"></b></button>
+      <button class="tile" id="tWifi"><span>📶</span><b data-t="tb_wifi"></b></button>
+      <button class="tile" id="tReview"><span>⭐</span><b data-t="tb_review"></b></button>
+    </div>
+    <div id="menu" class="menu" hidden><h2 data-t="tb_menu"></h2><table id="menuT"></table></div>
+    <p class="note" data-t="table_note"></p>
+  </section>
+
   <div class="toast" id="toast"></div>
 </div>
 <p class="demo" data-t="demo"></p>
 
 <script>
 const T = {
-  ckb:{dir:"rtl",tag:"کارتی دڵسۆزی دیجیتاڵ",v_join:"بەشداربوون",v_card:"کارتی کڕیار",v_staff:"کارمەند",v_owner:"خاوەنی دوکان",
+  ckb:{t_gift:"🎁 ٢ مۆری دیاری بەخێرهاتنت وەرگرت!",gift_note:"🎁 = دیاری بەخێرهاتن",v_table:"مێز",table_no:"مێزی ژمارە ٥",table_sub:"مۆبایلەکەت لە تاگی سەر مێزەکە بدە یان QR سکان بکە.",tb_menu:"مینیو",tb_card:"کارتی دڵسۆزی",tb_waiter:"بانگکردنی گارسۆن",tb_bill:"داواکردنی حساب",tb_wifi:"وایفای",tb_review:"هەڵسەنگاندن",t_waiter:"(نموونە) گارسۆن ئاگادار کرایەوە: مێزی ٥.",t_bill:"(نموونە) حسابی مێزی ٥ داواکرا. پارە لە کاونتەر بدە.",t_wifi:"(نموونە) وشەی نهێنی: shar2026 (کۆپی کرا)",t_review:"(نموونە) لاپەڕەی هەڵسەنگاندنی گووگڵ دەکرێتەوە.",table_note:"تاگی NFC + QR لەسەر هەر مێزێک. ئەم وەشانە داواکردن و پارەدان ناکات؛ تەنها مینیو، گارسۆن، حساب و کارتی دڵسۆزی.",iqd:"د.ع",menu:["ئێسپرێسۆ", "کاپوچینۆ", "چای", "چیزکەیک"],dir:"rtl",tag:"کارتی دڵسۆزی دیجیتاڵ",v_join:"بەشداربوون",v_card:"کارتی کڕیار",v_staff:"کارمەند",v_owner:"خاوەنی دوکان",
     shop:"کافێی شار",city:"هەولێر · شەقامی ١٠٠ مەتری",join_title:"ببە ئەندامی کارتی دڵسۆزیمان",
-    join_sub:"هەر جارێک سەردانمان بکەیت مۆرێک وەردەگریت. ١٠ مۆر = قاوەیەکی بەخۆڕایی.",
+    join_sub:"هەر سەردانێک = مۆرێک. ١٠ مۆر = قاوەیەکی بەخۆڕایی. ٢ مۆری یەکەم دیارییە لە ئێمەوە!",
     name:"ناو",name_ph:"ناوت بنووسە",phone:"ژمارەی مۆبایل",get_card:"کارتەکەم وەربگرە",
     no_app:"پێویست بە دابەزاندنی هیچ ئەپێک ناکات. کارتەکەت وەک لاپەڕەیەک لەسەر مۆبایلەکەت دەمێنێتەوە.",
     reward_rule:"١٠ مۆر کۆبکەرەوە، قاوەیەکی بەخۆڕایی وەربگرە",ready:"🎉 دیارییەکەت ئامادەیە! ئەم کارتە لە کاونتەر نیشان بدە.",
@@ -205,9 +232,9 @@ const T = {
     t_wa:"(نموونە) واتسئاپ دەکرێتەوە بە نامەیەکی ئامادە.",t_home:"(نموونە) ئایکۆنی کارتەکە دەچێتە سەر شاشەی سەرەکی.",
     t_offer:"(نموونە) ئۆفەرەکە نێردرا بۆ ٢٤٨ کڕیار.",t_need:"تکایە ناو و ژمارە بنووسە.",t_undo:"مۆرەکە لابرا.",
     demo:"ئەمە نموونەیەکی کلیککراوە بۆ پیشاندان. هیچ داتایەک ناپارێزرێت و هیچ نامەیەک نانێردرێت."},
-  ar:{dir:"rtl",tag:"بطاقة ولاء رقمية",v_join:"الانضمام",v_card:"بطاقة الزبون",v_staff:"الموظف",v_owner:"صاحب المحل",
+  ar:{t_gift:"🎁 حصلت على ختمين هدية ترحيب!",gift_note:"🎁 = هدية ترحيب",v_table:"الطاولة",table_no:"طاولة رقم ٥",table_sub:"المس الملصق على الطاولة بهاتفك أو امسح رمز QR.",tb_menu:"المنيو",tb_card:"بطاقة الولاء",tb_waiter:"نداء النادل",tb_bill:"طلب الحساب",tb_wifi:"الواي فاي",tb_review:"التقييم",t_waiter:"(عرض) تم إبلاغ النادل: طاولة ٥.",t_bill:"(عرض) تم طلب حساب طاولة ٥. الدفع عند الكاشير.",t_wifi:"(عرض) كلمة السر: shar2026 (تم النسخ)",t_review:"(عرض) تفتح صفحة تقييم Google.",table_note:"ملصق NFC + QR على كل طاولة. هذه النسخة بدون طلب أو دفع؛ فقط المنيو والنادل والحساب وبطاقة الولاء.",iqd:"د.ع",menu:["إسبريسو", "كابتشينو", "شاي", "تشيز كيك"],dir:"rtl",tag:"بطاقة ولاء رقمية",v_join:"الانضمام",v_card:"بطاقة الزبون",v_staff:"الموظف",v_owner:"صاحب المحل",
     shop:"كافيه شار",city:"أربيل · شارع ١٠٠ متر",join_title:"انضم إلى بطاقة الولاء",
-    join_sub:"احصل على ختم في كل زيارة. ١٠ أختام = قهوة مجانية.",
+    join_sub:"ختم لكل زيارة. ١٠ أختام = قهوة مجانية. أول ختمين هدية منا!",
     name:"الاسم",name_ph:"اكتب اسمك",phone:"رقم الهاتف",get_card:"احصل على بطاقتي",
     no_app:"لا حاجة لتحميل أي تطبيق. تبقى بطاقتك كصفحة على هاتفك.",
     reward_rule:"اجمع ١٠ أختام واحصل على قهوة مجانية",ready:"🎉 مكافأتك جاهزة! أظهر هذه البطاقة عند الكاشير.",
@@ -221,9 +248,9 @@ const T = {
     t_wa:"(عرض) يفتح واتساب برسالة جاهزة.",t_home:"(عرض) تظهر أيقونة البطاقة على الشاشة الرئيسية.",
     t_offer:"(عرض) أُرسل العرض إلى ٢٤٨ زبوناً.",t_need:"يرجى كتابة الاسم والرقم.",t_undo:"تم حذف الختم.",
     demo:"هذا نموذج تفاعلي للعرض فقط. لا يتم حفظ أي بيانات ولا إرسال أي رسالة."},
-  en:{dir:"ltr",tag:"digital loyalty card",v_join:"Join",v_card:"Customer card",v_staff:"Staff",v_owner:"Owner",
+  en:{t_gift:"🎁 You got 2 welcome stamps!",gift_note:"🎁 = welcome gift",v_table:"Table",table_no:"Table 5",table_sub:"Tap your phone on the table tag or scan the QR.",tb_menu:"Menu",tb_card:"Loyalty card",tb_waiter:"Call waiter",tb_bill:"Ask for the bill",tb_wifi:"Wi-Fi",tb_review:"Leave a review",t_waiter:"(Demo) Waiter notified: table 5.",t_bill:"(Demo) Bill requested for table 5. Pay at the counter.",t_wifi:"(Demo) Password: shar2026 (copied)",t_review:"(Demo) Opens the Google review page.",table_note:"NFC + QR tag on every table. This version has no ordering or payment: just menu, waiter, bill and loyalty card.",iqd:"IQD",menu:["Espresso", "Cappuccino", "Tea", "Cheesecake"],dir:"ltr",tag:"digital loyalty card",v_join:"Join",v_card:"Customer card",v_staff:"Staff",v_owner:"Owner",
     shop:"Shar Café",city:"Erbil · 100m Street",join_title:"Join our loyalty card",
-    join_sub:"Get a stamp on every visit. 10 stamps = a free coffee.",
+    join_sub:"One stamp per visit. 10 stamps = a free coffee. The first 2 are on us!",
     name:"Name",name_ph:"Your name",phone:"Phone number",get_card:"Get my card",
     no_app:"No app to download. Your card lives as a page on your phone.",
     reward_rule:"Collect 10 stamps, get a free coffee",ready:"🎉 Your reward is ready! Show this card at the counter.",
@@ -239,8 +266,9 @@ const T = {
     demo:"Clickable demo for showing shop owners. No data is saved and no messages are sent."}
 };
 const LOST=[["Karwan","کاروان","كاروان",34],["Shilan","شیلان","شيلان",41],["Dilan","دیلان","ديلان",45],["Hawre","هاوڕێ","هاوري",52]];
+const PRICES=[3000,4500,1000,5000];
 const WEEKS=[38,44,41,52,49,58,63,61];
-let lang="ckb", stamps=6, view="join", custName="Rozh", custPhone="0750 123 4821";
+let gift=2, lang="ckb", stamps=6, view="join", custName="Rozh", custPhone="0750 123 4821";
 const $=s=>document.querySelector(s);
 const ar="٠١٢٣٤٥٦٧٨٩";
 const num=n=>lang==="en"?String(n):String(n).replace(/\d/g,d=>ar[d]);
@@ -264,7 +292,7 @@ function render(){
   document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
   document.querySelectorAll("[data-ph]").forEach(el=>el.placeholder=t(el.dataset.ph));
   document.querySelectorAll("[data-n]").forEach(el=>el.textContent=num(el.dataset.n));
-  $("#stamps").innerHTML=Array.from({length:10},(_,i)=>`<div class="stamp ${i<stamps?'full':''}">${i<stamps?'☕':''}</div>`).join("");
+  $("#stamps").innerHTML=Array.from({length:10},(_,i)=>`<div class="stamp ${i<stamps?(i<gift?'gift':'full'):''}">${i<stamps?(i<gift?'🎁':'☕'):''}</div>`).join("");
   $("#cnt").textContent=`${num(stamps)}/${num(10)}`;
   $("#ready").classList.toggle("on",stamps>=10);
   $("#who").textContent=custName+" · "+num(4821);
@@ -275,6 +303,7 @@ function render(){
   const li=lang==="ckb"?1:lang==="ar"?2:0;
   $("#lost").innerHTML=LOST.map(r=>`<tr><td><b>${r[li]}</b></td><td class="muted">${t("days",r[3])}</td><td style="text-align:end"><button class="mini" data-wa>${t("wa_btn")}</button></td></tr>`).join("");
   document.querySelectorAll("[data-wa]").forEach(b=>b.onclick=()=>toast("t_wa"));
+  $("#menuT").innerHTML=T[lang].menu.map((n,i)=>`<tr><td>${n}</td><td class="muted">${num(PRICES[i].toLocaleString("en"))} ${t("iqd")}</td></tr>`).join("");
   chart();
 }
 function go(v){view=v;document.querySelectorAll("#views button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
@@ -284,11 +313,15 @@ $("#views").onclick=e=>{if(e.target.dataset.v)go(e.target.dataset.v)};
 $("#langs").onclick=e=>{const l=e.target.dataset.l;if(!l)return;lang=l;$("#toast").classList.remove("on");
   document.querySelectorAll("#langs button").forEach(b=>b.classList.toggle("on",b.dataset.l===l));render()};
 $("#getCard").onclick=()=>{const n=$("#nm").value.trim(),p=$("#ph").value.trim();
-  if(!n||!p){toast("t_need");return} custName=n;custPhone=p;stamps=1;render();go("card");toast("t_stamp")};
+  if(!n||!p){toast("t_need");return} custName=n;custPhone=p;stamps=gift;render();go("card");toast("t_gift")};
 $("#add").onclick=()=>{if(stamps<10){stamps++;render();toast("t_stamp")}};
 $("#undo").onclick=()=>{if(stamps>0){stamps--;render();toast("t_undo")}};
-$("#redeem").onclick=()=>{stamps=0;render();toast("t_redeem")};
+$("#redeem").onclick=()=>{stamps=0;gift=0;render();toast("t_redeem")};
 $("#toWa").onclick=()=>toast("t_wa"); $("#toHome").onclick=()=>toast("t_home");
+$("#tMenu").onclick=()=>{$("#menu").hidden=!$("#menu").hidden};
+$("#tCard").onclick=()=>go("card");
+$("#tWaiter").onclick=()=>toast("t_waiter"); $("#tBill").onclick=()=>toast("t_bill");
+$("#tWifi").onclick=()=>toast("t_wifi"); $("#tReview").onclick=()=>toast("t_review");
 $("#sendOffer").onclick=()=>{toast("t_offer");$("#offer").value=""};
 $("#qr").innerHTML=qr(4821);
 render();
